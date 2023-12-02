@@ -24,13 +24,23 @@ fn word_to_number(word: &str) -> Option<i32> {
     }
 }
 
-fn parse_results(strings: Vec<&str>) -> Vec<i32> {
-    let number_pattern =
-        Regex::new(r"(?:\d|one|two|three|four|five|six|seven|eight|nine)").unwrap();
+fn parse_results(strings: Vec<&str>, regex_pattern: &str) -> Vec<i32> {
+    let number_pattern = Regex::new(regex_pattern).unwrap();
+
     let mut calibration_values: Vec<i32> = Vec::new();
 
-    for (index, s) in strings.iter().enumerate() {
-        let replaced_string = s.to_string().replace("twone", "twoone");
+    for (_index, s) in strings.iter().enumerate() {
+        let replaced_string = s
+            .to_string()
+            .replace("twone", "twoone")
+            .replace("eightwo", "eighttwo")
+            .replace("eighthree", "eightthree")
+            .replace("oneight", "oneeight")
+            .replace("fiveight", "fiveeight")
+            .replace("sevenine", "sevennine")
+            .replace("nineight", "nineeight")
+            .replace("threeight", "threeeight");
+
         let matches: Vec<&str> = number_pattern
             .find_iter(replaced_string.as_str())
             .map(|m| m.as_str())
@@ -81,32 +91,40 @@ fn parse_results(strings: Vec<&str>) -> Vec<i32> {
 
             let result_digit = first_digit * 10 + last_digit;
             calibration_values.push(result_digit);
-
-            // println!("{:?}", s);
-            // println!(
-            //     "{:?} matches: {:?} result {:?}",
-            //     index, matches, result_digit
-            // );
         }
     }
-    println!("{:?}", calibration_values);
     calibration_values
 }
 
-fn first_challenge() {
+fn first_challenge_a() {
     let file_content = read_file("src/challenge_files/1.txt").unwrap();
+    let regex_pattern = r"\d";
 
     let strings: Vec<&str> = file_content.split("\n").collect();
 
-    let calibration_values = parse_results(strings);
+    let calibration_values = parse_results(strings, regex_pattern);
     println!(
-        "sum of numbers: {:?}",
+        "Challenge 1a - sum of numbers: {:?}",
+        calibration_values.iter().sum::<i32>()
+    );
+}
+
+fn first_challenge_b() {
+    let file_content = read_file("src/challenge_files/1.txt").unwrap();
+    let regex_pattern = r"(?:\d|one|two|three|four|five|six|seven|eight|nine)";
+
+    let strings: Vec<&str> = file_content.split("\n").collect();
+
+    let calibration_values = parse_results(strings, regex_pattern);
+    println!(
+        "Challenge 1b - sum of numbers: {:?}",
         calibration_values.iter().sum::<i32>()
     );
 }
 
 fn main() {
-    first_challenge()
+    first_challenge_a();
+    first_challenge_b();
 }
 
 #[cfg(test)]
@@ -114,6 +132,7 @@ mod tests {
     use super::*;
     #[test]
     fn test_parse_results() {
+        let regex_pattern = r"(?:\d|one|two|three|four|five|six|seven|eight|nine)";
         let strings = vec![
             "1abc2",
             "pqr3stu8vwx",
@@ -131,7 +150,7 @@ mod tests {
             "zoneight234",
             "7pqrstsixteen",
         ];
-        let calibration_values = parse_results(strings);
+        let calibration_values = parse_results(strings, regex_pattern);
         assert_eq!(
             calibration_values,
             vec![12, 38, 15, 77, 14, 13, 11, 99, 29, 83, 13, 24, 42, 14, 76]
@@ -140,6 +159,7 @@ mod tests {
 
     #[test]
     fn test_parse_results_number_literal() {
+        let regex_pattern = r"(?:\d|one|two|three|four|five|six|seven|eight|nine)";
         let strings = vec![
             "two1nine",
             "eightwothree",
@@ -150,7 +170,7 @@ mod tests {
             "7pqrstsixteen",
             "trknlxnv43zxlrqjtwonect",
         ];
-        let calibration_values = parse_results(strings);
+        let calibration_values = parse_results(strings, regex_pattern);
         assert_eq!(calibration_values, vec![29, 83, 13, 24, 42, 14, 76, 41]);
     }
 }
