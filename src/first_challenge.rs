@@ -1,5 +1,5 @@
-use regex::Regex;
 use crate::utils::read_file;
+use regex::Regex;
 
 fn word_to_number(word: &str) -> Option<i32> {
     match word.to_lowercase().as_str() {
