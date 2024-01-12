@@ -1,7 +1,5 @@
 use regex::Regex;
-use std::fs::File;
-use std::io::Read;
-use std::io::Result;
+use crate::utils::read_file;
 
 #[derive(Debug, PartialEq)]
 enum Color {
@@ -108,13 +106,6 @@ fn consume_results(games_list: Vec<Game>, ) -> i32 {
         }
     }
     games_list.iter().map(|cube| cube.id).sum::<i32>() - index_to_remove.iter().sum::<i32>()
-}
-
-fn read_file(filename: &str) -> Result<String> {
-    let mut file = File::open(filename)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(contents)
 }
 
 pub fn second_challenge_a() {

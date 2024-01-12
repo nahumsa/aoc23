@@ -1,14 +1,5 @@
 use regex::Regex;
-use std::fs::File;
-use std::io::Read;
-use std::io::Result;
-
-fn read_file(filename: &str) -> Result<String> {
-    let mut file = File::open(filename)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(contents)
-}
+use crate::utils::read_file;
 
 fn word_to_number(word: &str) -> Option<i32> {
     match word.to_lowercase().as_str() {
