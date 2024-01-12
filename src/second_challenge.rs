@@ -1,4 +1,7 @@
 use regex::Regex;
+use std::fs::File;
+use std::io::Read;
+use std::io::Result;
 
 #[derive(Debug, PartialEq)]
 enum Color {
@@ -14,6 +17,7 @@ fn parse_color(input: &str) -> Option<Color> {
         _ => None,
     }
 }
+
 fn parse_int(input: &str) -> Option<i32> {
     match input.trim().parse::<i32>() {
         Ok(num) => Some(num),
@@ -60,8 +64,7 @@ fn parse_results(strings: Vec<&str>) -> Vec<Game> {
             .split(r";")
             .flat_map(|s| s.trim().split(","))
             .flat_map(|s| {
-                let mut cube_info: Vec<&str> = s.split_whitespace().collect();
-                println!("{:?}", cube_info);
+                let cube_info: Vec<&str> = s.split_whitespace().collect();
                 Some(Cube::new(
                     parse_color(cube_info.get(1).unwrap()).unwrap(),
                     parse_int(cube_info.get(0).unwrap()).unwrap(),
@@ -69,7 +72,6 @@ fn parse_results(strings: Vec<&str>) -> Vec<Game> {
             })
             .collect();
 
-        println!("{:?}", draw);
         game_return.push(Game {
             id: game_id,
             cubes: draw,
@@ -77,6 +79,53 @@ fn parse_results(strings: Vec<&str>) -> Vec<Game> {
     }
 
     game_return
+}
+
+fn consume_results(games_list: Vec<Game>, ) -> i32 {
+    let mut index_to_remove: Vec<i32> = vec![];
+    for game in &games_list {
+        for cube in &game.cubes {
+            match cube.color {
+                Color::Red => {
+                    if cube.quantity > 12 {
+                        index_to_remove.push(game.id);
+                        break
+                    }
+                },
+                Color::Green => {
+                    if cube.quantity > 13 {
+                        index_to_remove.push(game.id);
+                        break
+                    }
+                },
+                Color::Blue => {
+                    if cube.quantity > 14 {
+                        index_to_remove.push(game.id);
+                        break
+                    }
+                },
+            }
+        }
+    }
+    games_list.iter().map(|cube| cube.id).sum::<i32>() - index_to_remove.iter().sum::<i32>()
+}
+
+fn read_file(filename: &str) -> Result<String> {
+    let mut file = File::open(filename)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
+}
+
+pub fn second_challenge_a() {
+    let file_content = read_file("src/challenge_files/2.txt").unwrap();
+    let strings: Vec<&str> = file_content.split("\n").collect();
+    let games = parse_results(strings);
+    let result = consume_results(games);
+    println!(
+        "Challenge 2a - sum of ids: {:?}",
+        result
+    );
 }
 
 #[cfg(test)]
@@ -100,5 +149,20 @@ mod tests {
                 ],
             })
         );
+    }
+    #[test]
+    fn test_2a_results() {
+        let example = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+        Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+        Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+        Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+        Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
+        
+        let strings: Vec<&str> = example.split("\n").collect();
+        let games = parse_results(strings);
+        let result = consume_results(games);
+
+        assert_eq!(result, 8);
+
     }
 }

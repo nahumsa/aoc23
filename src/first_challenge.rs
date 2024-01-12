@@ -9,6 +9,7 @@ fn read_file(filename: &str) -> Result<String> {
     file.read_to_string(&mut contents)?;
     Ok(contents)
 }
+
 fn word_to_number(word: &str) -> Option<i32> {
     match word.to_lowercase().as_str() {
         "one" => Some(1),
